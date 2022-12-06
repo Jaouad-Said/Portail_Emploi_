@@ -1,0 +1,193 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<script type="text/javascript" src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<div class="col-md12" style="margin: 15px">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="">Nom : </label>
+                </div>
+                <div class="col-md-10">
+                    <input type="text"
+                           id="txtNom"
+                           placeholder="Nom du Candidat"
+                           style="width: 100%" />
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-2">
+                    <label for="">Prenom : </label>
+                </div>
+                <div class="col-md-10">
+                    <input type="text"
+                           id="txtPnom"
+                           placeholder="Prenom du Candidat"
+                           style="width: 100%" />
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-2">
+                    <label for="">Email : </label>
+                </div>
+                <div class="col-md-10">
+                    <input type="text"
+                           id="txtMail"
+                           placeholder="exemple@mail.com"
+                           style="width: 100%" />
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-2">
+                    <label for="">Telephone : </label>
+                </div>
+                <div class="col-md-10">
+                    <input type="text"
+                           id="txtTel"
+                           placeholder="0666717171"
+                           style="width: 100%" />
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-2">
+                    <label for="">Niveau d'étude : </label>
+                </div>
+                <div class="col-md-10">
+                    <input type="text"
+                           id="txtNetude"
+                           placeholder="Bac +3"
+                           style="width: 100%" />
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-2">
+                    <label for="">Nombre années d expérience : </label>
+                </div>
+                <div class="col-md-10">
+                    <input type="number"
+                           id="txtExp"
+                           placeholder="3"
+                           style="width: 100%" />
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-2">
+                    <label for="">Dernier employeur : </label>
+                </div>
+                <div class="col-md-10">
+                    <input type="text"
+                           id="txtDEmp"
+                           placeholder="Google"
+                           style="width: 100%" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="">CV : </label>
+                </div>
+                <div class="col-md-10">
+                    <input type="file"
+                           id="txtCV"
+                           value="Upload Resume"
+                           style="width: 100%" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <img alt="Resume Image"
+                 id="cvViewer"
+                 width="200"
+                 height="400"
+                 style="border: 1px solid #111111" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <button class="btn btn-primary"
+                    id="btnSave"
+                    style="width: 20%; margin-top: 10px">
+                Sauvgarder
+            </button>
+            <button class="btn btn-info"
+                    id="btnView"
+                    style="width: 20%; margin-top: 10px">
+                Visualiser
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+    });
+    $('#txtCV').change(function (event) {
+        var files = event.target.files;
+        $("#cvViewer").attr("src", window.URL.createObjectURL(files[0]));
+    });
+    $("#btnSave").click(function () {
+        var files = $("#txtCV").prop("files");
+        var formData = new FormData();
+        for (var i = 0; i < files.length; i++) {
+            formData.append("file", files[i]);
+        }
+        var oCandidat = {
+            Nom: $("#txtNom").val(),
+            Prenom: $("#txtPnom").val(),
+            Mail: $("#txtMail").val(),
+            Telephone: $("#txtTel").val(),
+            N_Etude: $("#txtNetude").val(),
+            N_Experience: $("#txtExp").val(),
+            D_Employeur: $("#txtDEmp").val(),
+        };
+        formData.append("Candidat", JSON.stringify(oCandidat))
+        $.ajax({
+            type: "POST",
+            url: "/Home/SaveFile",
+            data: formData,
+            processData: false,
+            contentType: false,
+            sucess: function (data) {
+                ResetFields();
+                alert(data);
+            },
+            error: function (data) {
+                console.log('Error : ', data)
+            }
+        });
+    });
+
+    $("#btnView").click(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Home/GetSavedCandidat",
+            sucess: function (data) {
+                $("#txtNom").val(data.Nom);
+                $("#txtPnom").val(data.Prenom);
+                $("#txtMail").val(data.Mail);
+                $("#txtTel").val(data.Telephone);
+                $("#txtNetude").val(data.N_Etude);
+                $("#txtExp").val(data.N_Experience);
+                $("#txtDEmp").val(data.D_Employeur);
+                $("#cvViewer").attr("src", "data:image/jpg;base64," + data.CV + "")
+            },
+            error: function (data) {
+                console.log('Error : ', data)
+            }
+        });
+    })
+
+    function ResetFields() {
+        $("#txtNom").val("");
+        $("#txtPnom").val("");
+        $("#txtMail").val("");
+        $("#txtTel").val("");
+        $("#txtNetude").val("");
+        $("#txtExp").val(0);
+        $("#txtDEmp").val("");
+        $("#cvViewer").attr("src", "");
+    }
+</script>
